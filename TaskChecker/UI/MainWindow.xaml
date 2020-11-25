@@ -1,0 +1,28 @@
+﻿<Window x:Class="TaskChecker.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TaskChecker.UI"
+        mc:Ignorable="d"
+        Title="TaskChecker" Height="450" Width="800">
+
+    <Window.DataContext>
+        <local:MainWindowVm/>
+    </Window.DataContext>
+
+    <Grid>
+        <StackPanel HorizontalAlignment="Left">
+            <TextBlock Width="100" Height="30"
+                       Text="{Binding CurrentTaskListVm.Title}"></TextBlock>
+            <TreeView ItemsSource="{Binding CurrentTaskListVm.Tasks}">
+                <TreeView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Title}"></TextBlock>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </StackPanel>
+        
+    </Grid>
+</Window>
