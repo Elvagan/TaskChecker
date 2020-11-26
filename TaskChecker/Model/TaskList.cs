@@ -20,9 +20,9 @@ namespace TaskChecker.Model
 
         public void AddTask(Model.Task task, Model.Task parent = null)
         {
-            if (parent != null && Tasks.Contains(task))
+            if (parent != null && Tasks.Contains(parent))
             {
-                var parentTask = Tasks.First(t => t == task);
+                var parentTask = Tasks.First(t => t == parent);
                 parentTask.SubTasks.Add(task);
             }
             else

@@ -4,8 +4,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              d1p1:Ignorable="d"
              xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006">
-  <Application.Resources>
+    <Application.Resources>
         <ResourceDictionary>
+            <BitmapImage x:Key="Add" UriSource="/res/Images/add_grey_16x.png"/>
+            <BitmapImage x:Key="Remove" UriSource="/res/Images/Remove_16x.png"/>
+            <BitmapImage x:Key="Todo" UriSource="/res/Images/StatusNotStarted_16x.png"/>
+            <BitmapImage x:Key="Doing" UriSource="/res/Images/StatusRunOutline_grey_16x.png"/>
+            <BitmapImage x:Key="Done" UriSource="/res/Images/StatusOK_16x.png"/>
         </ResourceDictionary>
-  </Application.Resources>
+    </Application.Resources>
 </Application>

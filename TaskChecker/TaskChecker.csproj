@@ -62,7 +62,11 @@
     <Compile Include="Tool\RelayCommand.cs" />
     <Compile Include="Tool\ViewModelBase.cs" />
     <Compile Include="UI\MainWindowVm.cs" />
+    <Compile Include="UI\TaskListControl.xaml.cs">
+      <DependentUpon>TaskListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\TaskListVm.cs" />
+    <Compile Include="ViewModel\TaskVm.cs" />
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,6 +79,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UI\TaskListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Task.cs" />
@@ -105,6 +113,20 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="res\Images\Remove_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\Add_grey_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\StatusNotStarted_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\StatusRunOutline_grey_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\StatusOK_16x.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
