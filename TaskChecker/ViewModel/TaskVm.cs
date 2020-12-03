@@ -11,16 +11,28 @@ using Task = TaskChecker.Model.Task;
 
 namespace TaskChecker.ViewModel
 {
-    class TaskVm : ViewModelBase
+    internal class TaskVm : ViewModelBase
     {
         #region Events
 
         /// <summary>
         /// Occurs when the status has changed.
         /// </summary>
-        public event Action StatusChanged;
+        public event Action<TaskVm> AskDelete;
 
-        #endregion
+        #endregion Events
+
+        public TaskVm Parent
+        {
+            get => _parent;
+            set
+            {
+                _parent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TaskVm _parent;
 
         public string Title
         {
@@ -32,20 +44,35 @@ namespace TaskChecker.ViewModel
             }
         }
 
-        public Model.Task.State Status => Model.CurrentState;
+        public Model.Task.Status Status => Model.CurrentStatus;
+
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isExpanded;
 
         public string StatusString
         {
             get
             {
-                switch (Model.CurrentState)
+                switch (Model.CurrentStatus)
                 {
-                    case Task.State.Todo:
+                    case Task.Status.Todo:
                         return "To Do";
-                    case Task.State.Doing:
+
+                    case Task.Status.Doing:
                         return "Doing";
-                    case Task.State.Done:
+
+                    case Task.Status.Done:
                         return "Done";
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -60,18 +87,20 @@ namespace TaskChecker.ViewModel
 
         #region Constructor
 
-        public TaskVm(Model.Task model)
+        public TaskVm(Model.Task model, TaskVm parent = null)
         {
             Model = model;
-            SubTasks = new ObservableCollection<TaskVm>(Model.SubTasks.Select(t => new TaskVm(t)));
+            Parent = parent;
+            SubTasks = new ObservableCollection<TaskVm>(Model.SubTasks.Select(t => new TaskVm(t, this)));
 
             foreach (var subTask in SubTasks)
             {
                 subTask.PropertyChanged += OnSubTaskPropertyChanged;
+                subTask.AskDelete += OnSubTaskAskDelete;
             }
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Callback
 
@@ -79,15 +108,18 @@ namespace TaskChecker.ViewModel
         {
             if (e.PropertyName != nameof(Status)) return;
 
-            Task.State newStatus = ComputeNewStatus();
-
-            if (Status != newStatus) Model.CurrentState = newStatus;
-
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(Completion));
+            RefreshStatus();
         }
 
-        #endregion
+        private void OnSubTaskAskDelete(TaskVm sender)
+        {
+            SubTasks.Remove(sender);
+            Model.SubTasks.Remove(sender.Model);
+
+            RefreshStatus();
+        }
+
+        #endregion Callback
 
         #region Commands
 
@@ -102,7 +134,7 @@ namespace TaskChecker.ViewModel
             SwitchStatus();
         }
 
-        #endregion
+        #endregion Change Status
 
         #region Add Task
 
@@ -115,36 +147,50 @@ namespace TaskChecker.ViewModel
             AddSubTask("");
         }
 
-        #endregion
+        #endregion Add Task
 
-        #endregion
+        #region Remove
+
+        public ICommand RemoveTaskCommand => _removeTaskCommand ?? (_removeTaskCommand = new RelayCommand(RemoveTask));
+
+        private RelayCommand _removeTaskCommand;
+
+        private void RemoveTask(object sender)
+        {
+            RemoveSubTasks();
+            AskDelete?.Invoke(this);
+        }
+
+        #endregion Remove
+
+        #endregion Commands
 
         #region Private methods
 
-        private void SwitchStatus(Task.State? status = null)
+        private void SwitchStatus(Task.Status? status = null)
         {
             if (status == null)
             {
-                if (Model.CurrentState == Task.State.Done) Model.CurrentState = Task.State.Todo;
-                else Model.CurrentState += 1;
+                if (Model.CurrentStatus == Task.Status.Done) Model.CurrentStatus = Task.Status.Todo;
+                else Model.CurrentStatus += 1;
             }
             else
             {
-                Model.CurrentState = status.Value;
+                Model.CurrentStatus = status.Value;
             }
 
-            if (Model.CurrentState == Task.State.Done)
+            if (Model.CurrentStatus == Task.Status.Done)
             {
                 foreach (var subTask in SubTasks)
                 {
-                    subTask.SwitchStatus(Task.State.Done);
+                    subTask.SwitchStatus(Task.Status.Done);
                 }
             }
-            else if (Model.CurrentState == Task.State.Todo)
+            else if (Model.CurrentStatus == Task.Status.Todo)
             {
                 foreach (var subTask in SubTasks)
                 {
-                    subTask.SwitchStatus(Task.State.Todo);
+                    subTask.SwitchStatus(Task.Status.Todo);
                 }
             }
 
@@ -152,9 +198,9 @@ namespace TaskChecker.ViewModel
             OnPropertyChanged(nameof(Completion));
         }
 
-        private Task.State ComputeNewStatus()
+        private Task.Status ComputeNewStatus()
         {
-            List<Task.State> Statuses = new List<Task.State>();
+            List<Task.Status> Statuses = new List<Task.Status>();
             foreach (var subTask in SubTasks)
             {
                 Statuses.Add(subTask.ComputeNewStatus());
@@ -162,23 +208,56 @@ namespace TaskChecker.ViewModel
 
             if (Statuses.Count == 0)
             {
-                Statuses.Add(Model.CurrentState);
+                Statuses.Add(Model.CurrentStatus);
             }
 
-            if (Statuses.All(s => s == Task.State.Done)) return Task.State.Done;
+            if (Statuses.All(s => s == Task.Status.Done)) return Task.Status.Done;
 
-            return Statuses.All(s => s == Task.State.Todo) ? Task.State.Todo : Task.State.Doing;
+            return Statuses.All(s => s == Task.Status.Todo) ? Task.Status.Todo : Task.Status.Doing;
         }
 
-        private void AddSubTask(string name)
+        private void RefreshStatus()
         {
-            Model.Task newTask = new Model.Task(name);
+            Task.Status newStatus = ComputeNewStatus();
+            if (Status != newStatus) Model.CurrentStatus = newStatus;
 
-            Model.SubTasks.Add(newTask);
-            TaskVm newTaskVm = new TaskVm(newTask);
+            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged(nameof(Completion));
+        }
+
+        public void AddSubTask(Task task)
+        {
+            Model.SubTasks.Add(task);
+            TaskVm newTaskVm = new TaskVm(task, this);
             SubTasks.Add(newTaskVm);
             newTaskVm.PropertyChanged += OnSubTaskPropertyChanged;
+            newTaskVm.AskDelete += OnSubTaskAskDelete;
+            IsExpanded = true;
+
+            RefreshStatus();
         }
-        #endregion
+
+        public void AddSubTask(string name)
+        {
+            Task newTask = new Task(name);
+            AddSubTask(newTask);
+        }
+
+        private void RemoveSubTasks()
+        {
+            foreach (var subTask in SubTasks)
+            {
+                subTask.PropertyChanged -= OnSubTaskPropertyChanged;
+                subTask.AskDelete -= OnSubTaskAskDelete;
+                subTask.RemoveSubTasks();
+            }
+
+            Model.SubTasks.Clear();
+            SubTasks.Clear();
+
+            RefreshStatus();
+        }
+
+        #endregion Private methods
     }
 }

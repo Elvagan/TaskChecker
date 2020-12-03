@@ -7,10 +7,9 @@ using System.Windows.Input;
 
 namespace TaskChecker.Model
 {
-
-    class Task
+    internal class Task
     {
-        public enum State
+        public enum Status
         {
             Todo,
             Doing,
@@ -21,7 +20,7 @@ namespace TaskChecker.Model
 
         public string Title { get; set; }
 
-        public State CurrentState { get; set; }
+        public Status CurrentStatus { get; set; }
 
         public List<Task> SubTasks { get; set; } = new List<Task>();
 
@@ -29,8 +28,8 @@ namespace TaskChecker.Model
         {
             get
             {
-                if (CurrentState == State.Done) return 100;
-                else if (CurrentState == State.Todo) return 0;
+                if (CurrentStatus == Status.Done) return 100;
+                else if (CurrentStatus == Status.Todo) return 0;
 
                 double completion = 0.0;
                 if (SubTasks.Count > 0)
@@ -44,21 +43,19 @@ namespace TaskChecker.Model
                 }
 
                 return (int)Math.Round(completion);
-
             }
         }
 
-        #endregion
+        #endregion Properties
 
         #region Constructor
 
         public Task(string title)
         {
             Title = title;
-            CurrentState = State.Todo;
+            CurrentStatus = Status.Todo;
         }
 
-        #endregion
-
+        #endregion Constructor
     }
 }

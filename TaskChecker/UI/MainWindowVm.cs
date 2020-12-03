@@ -9,13 +9,12 @@ using Task = TaskChecker.Model.Task;
 
 namespace TaskChecker.UI
 {
-    class MainWindowVm
+    internal class MainWindowVm
     {
         public TaskListVm CurrentTaskListVm { get; set; }
 
         public MainWindowVm()
         {
-            TaskList newTaskList = new TaskList("First task list");
             Task task01 = new Task("Task 01");
             Task task0101 = new Task("Task 01-01");
             Task task02 = new Task("Task 02");
@@ -23,14 +22,15 @@ namespace TaskChecker.UI
             Task task0202 = new Task("Task 02-02");
             Task task03 = new Task("Task 03");
 
-            newTaskList.AddTask(task01);
-            newTaskList.AddTask(task0101,task01);
-            newTaskList.AddTask(task02);
-            newTaskList.AddTask(task0201, task02);
-            newTaskList.AddTask(task0202, task02);
-            newTaskList.AddTask(task03);
+            CurrentTaskListVm = new TaskListVm("Task List");
 
-            CurrentTaskListVm = new TaskListVm(newTaskList);
+            task01.SubTasks.Add(task0101);
+            task02.SubTasks.Add(task0201);
+            task02.SubTasks.Add(task0202);
+
+            CurrentTaskListVm.AddTask(task01);
+            CurrentTaskListVm.AddTask(task02);
+            CurrentTaskListVm.AddTask(task03);
         }
     }
 }

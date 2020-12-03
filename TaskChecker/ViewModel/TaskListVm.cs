@@ -11,39 +11,68 @@ using TaskChecker.Tool;
 
 namespace TaskChecker.ViewModel
 {
-    class TaskListVm : ViewModelBase
+    internal class TaskListVm : ViewModelBase
     {
         public string Title
         {
-            get => Model.Title;
+            get => _title;
             set
             {
-                Model.Title = value;
+                _title = value;
                 OnPropertyChanged();
             }
         }
-        
-        public ObservableCollection<TaskVm> Tasks { get; set; }
 
-        public TaskList Model { get; set; }
+        public string _title;
 
-        public TaskListVm(TaskList model)
+        public ObservableCollection<TaskVm> Tasks { get; set; } = new ObservableCollection<TaskVm>();
+
+        public TaskListVm(string title)
         {
-            Model = model;
-            Tasks = new ObservableCollection<TaskVm>(Model.Tasks.Select(t => new TaskVm(t)));
+            _title = title;
+            /*Tasks = new ObservableCollection<TaskVm>(Model.Tasks.Select(t => new TaskVm(t)));
+
+            foreach (var taskVm in Tasks)
+            {
+                taskVm.AskDelete += OnTaskVmAskDelete;
+            }*/
         }
 
-        public void AddTask(string name)
+        public void AddTask(string name, Model.Task parent = null)
         {
             Model.Task newTask = new Model.Task(name);
+            AddTask(newTask, parent);
+        }
 
-            Model.Tasks.Add(newTask);
+        public void AddTask(Model.Task task, Model.Task parent = null)
+        {
+            if (parent != null)
+            {
+                TaskVm parentVm = Tasks.FirstOrDefault(t => t.Model == parent);
+
+                parentVm?.AddSubTask(task);
+            }
+            else
+            {
+                TaskVm newVm = new TaskVm(task);
+                newVm.AskDelete += OnTaskVmAskDelete;
+                Tasks.Add(newVm);
+            }
         }
 
         public void RemoveTask()
         {
-
         }
+
+        #region Callback
+
+        private void OnTaskVmAskDelete(TaskVm taskVm)
+        {
+            taskVm.AskDelete -= OnTaskVmAskDelete;
+            Tasks.Remove(taskVm);
+        }
+
+        #endregion Callback
 
         #region Commands
 
@@ -55,7 +84,7 @@ namespace TaskChecker.ViewModel
         {
             AddTask("");
         }
-        
-        #endregion
+
+        #endregion Commands
     }
 }

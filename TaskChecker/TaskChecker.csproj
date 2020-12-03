@@ -86,7 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Task.cs" />
-    <Compile Include="Model\TaskList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -127,6 +126,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="res\Images\StatusOK_16x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\AddSub_black_24x.png" />
+    <Resource Include="res\Images\Doing_grey_24x.png" />
+    <Resource Include="res\Images\Done_grey_24x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\Images\Todo_grey_24x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
