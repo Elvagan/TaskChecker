@@ -5,12 +5,12 @@
              d1p1:Ignorable="d"
              xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006">
     <Application.Resources>
+
         <ResourceDictionary>
-            <BitmapImage x:Key="Add" UriSource="/res/Images/AddSub_black_24x.png" />
-            <BitmapImage x:Key="Remove" UriSource="/res/Images/Remove_16x.png" />
-            <BitmapImage x:Key="Todo" UriSource="/res/Images/Todo_grey_24x.png" />
-            <BitmapImage x:Key="Doing" UriSource="/res/Images/Doing_grey_24x.png" />
-            <BitmapImage x:Key="Done" UriSource="/res/Images/Done_grey_24x.png" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="UI/Dictionaries/Images.xaml" />
+                <ResourceDictionary Source="UI/Dictionaries/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

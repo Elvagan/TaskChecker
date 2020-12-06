@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
-namespace TaskChecker.Model
+namespace TaskChecker.Models
 {
     internal class Task
     {
         public enum Status
         {
+            None,
             Todo,
             Doing,
             Done
@@ -18,18 +15,31 @@ namespace TaskChecker.Model
 
         #region Properties
 
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
         public string Title { get; set; }
 
+        /// <summary>
+        /// Gets or sets the current status.
+        /// </summary>
         public Status CurrentStatus { get; set; }
 
+        /// <summary>
+        /// Gets or sets the sub tasks.
+        /// </summary>
         public List<Task> SubTasks { get; set; } = new List<Task>();
 
+        /// <summary>
+        /// Gets the task completion.
+        /// </summary>
         public int Completion
         {
             get
             {
                 if (CurrentStatus == Status.Done) return 100;
-                else if (CurrentStatus == Status.Todo) return 0;
+
+                if (CurrentStatus == Status.Todo) return 0;
 
                 double completion = 0.0;
                 if (SubTasks.Count > 0)

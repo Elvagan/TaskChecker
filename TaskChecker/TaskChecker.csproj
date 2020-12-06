@@ -58,15 +58,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Interface\IDispatcherService.cs" />
-    <Compile Include="Tool\RelayCommand.cs" />
-    <Compile Include="Tool\ViewModelBase.cs" />
+    <Compile Include="Interfaces\IDispatcherService.cs" />
+    <Compile Include="Tools\RelayCommand.cs" />
+    <Compile Include="Tools\ViewModelBase.cs" />
     <Compile Include="UI\MainWindowVm.cs" />
     <Compile Include="UI\TaskListControl.xaml.cs">
       <DependentUpon>TaskListControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\TaskListVm.cs" />
-    <Compile Include="ViewModel\TaskVm.cs" />
+    <Compile Include="UI\TemplateSelectors\TaskTemplateSelector.cs" />
+    <Compile Include="ViewModels\TaskListVm.cs" />
+    <Compile Include="ViewModels\TaskVm.cs" />
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -79,13 +80,21 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UI\Dictionaries\Images.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Dictionaries\Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\TaskListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\Task.cs" />
+    <Compile Include="Models\Task.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -113,27 +122,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="res\Images\Remove_16x.png" />
+    <Resource Include="res\Images\task_add_24px.png" />
+    <Resource Include="res\Images\task_doing_24px.png" />
+    <Resource Include="res\Images\task_done_24px.png" />
+    <Resource Include="res\Images\task_todo_24px.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="res\Images\Add_grey_16x.png" />
+    <Resource Include="res\Images\task_delete_24px.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="res\Images\StatusNotStarted_16x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="res\Images\StatusRunOutline_grey_16x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="res\Images\StatusOK_16x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="res\Images\AddSub_black_24x.png" />
-    <Resource Include="res\Images\Doing_grey_24x.png" />
-    <Resource Include="res\Images\Done_grey_24x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="res\Images\Todo_grey_24x.png" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
