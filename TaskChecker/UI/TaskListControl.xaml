@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:templateSelectors="clr-namespace:TaskChecker.UI.TemplateSelectors"
              xmlns:viewModel="clr-namespace:TaskChecker.ViewModels"
+             xmlns:behaviors="clr-namespace:TaskChecker.UI.Behaviors"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -59,7 +61,7 @@
                         </Image.Style>
                     </Image>
                 </Button>
-                <TextBox Grid.Column="1" Name="TextEdit" Margin="5" Text="{Binding Title}" VerticalAlignment="Center" IsTabStop="True" BorderBrush="Transparent" />
+                <TextBox Grid.Column="1" Name="TextEdit" MinWidth="200" Margin="5" Text="{Binding Title}" VerticalAlignment="Center" IsTabStop="True" BorderBrush="Transparent" />
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <TextBlock Margin="5" Text="{Binding Completion}" VerticalAlignment="Center" />
                     <Button Margin="5" Width="30" Height="30" Command="{Binding RemoveTaskCommand}"
@@ -106,13 +108,12 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="5" Width="300" Orientation="Vertical">
+        <StackPanel Grid.Row="0" Margin="5" MinWidth="300" Orientation="Vertical">
 
-            <TextBox Margin="5" Width="100" Text="{Binding CurrentTaskListVm.Title}" FontSize="20" FontWeight="Bold" IsTabStop="False" BorderBrush="Transparent" />
+            <TextBox Margin="5" Text="{Binding CurrentTaskListVm.Title}" FontSize="20" FontWeight="Bold" IsTabStop="False" BorderBrush="Transparent" />
 
             <Grid Height="20" Visibility="{Binding CurrentTaskListVm.HasRatio, Converter={StaticResource CompletionBarVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
@@ -127,10 +128,34 @@
             </Grid>
         </StackPanel>
 
-        <TreeView Grid.Row="2" MaxWidth="500" HorizontalContentAlignment="Stretch" BorderBrush="Transparent" KeyboardNavigation.TabNavigation="Contained"
-                  ItemsSource="{Binding CurrentTaskListVm.Tasks}"
-                  ItemContainerStyle="{StaticResource StretchTreeViewItemStyle}"
-                  ItemTemplateSelector="{StaticResource TaskTemplateSelector}">
-        </TreeView>
+        <Grid x:Name="ContentGrid" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="300" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TreeView Grid.Column="0" HorizontalContentAlignment="Stretch" BorderBrush="Transparent" KeyboardNavigation.TabNavigation="Contained"
+                      ItemsSource="{Binding CurrentTaskListVm.Tasks}"
+                      ItemContainerStyle="{StaticResource StretchTreeViewItemStyle}"
+                      ItemTemplateSelector="{StaticResource TaskTemplateSelector}">
+                <b:Interaction.Behaviors>
+                    <behaviors:BindableSelectedItemBehavior SelectedItem="{Binding CurrentTaskListVm.SelectedTask, Mode=TwoWay}" />
+                </b:Interaction.Behaviors>
+            </TreeView>
+            <GridSplitter x:Name="Splitter"  Grid.Column="1"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="Black"
+                          ResizeBehavior="PreviousAndCurrent"
+                          ResizeDirection="Columns"
+                          Width="5" />
+            <Expander Grid.Column="2" ExpandDirection="Right" VerticalAlignment="Stretch">
+                <!--<fsRichTextBox:FsRichTextBox MinWidth="300" Margin="10,10,10,5" />-->
+                <TextBox Text="{Binding CurrentTaskListVm.SelectedTask.Description, Mode=TwoWay}" MinWidth="300"   TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Visible" />
+            </Expander>
+        </Grid>
     </Grid>
 </UserControl>

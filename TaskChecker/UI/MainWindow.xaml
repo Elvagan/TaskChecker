@@ -4,15 +4,30 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TaskChecker.UI"
+        xmlns:fsRichTextBox="clr-namespace:FsWpfControls.FsRichTextBox;assembly=FsRichTextBox"
         FontSize="18"
         mc:Ignorable="d"
-        Title="TaskChecker" Height="600" Width="500">
+        Title="TaskChecker" Height="Auto" Width="Auto" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
 
     <Window.DataContext>
         <local:MainWindowVm />
     </Window.DataContext>
 
     <Grid>
-        <local:TaskListControl />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewTaskListCommand}" />
+                <MenuItem Header="_Open" Command="{Binding OpenTaskListCommand}" />
+                <MenuItem Header="_Save" Command="{Binding SaveTaskListCommand}" />
+                <Separator />
+                <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
+            </MenuItem>
+        </Menu>
+        <local:TaskListControl Grid.Row="1" MinWidth="300" />
     </Grid>
 </Window>

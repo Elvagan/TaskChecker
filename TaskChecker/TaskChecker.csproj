@@ -38,6 +38,12 @@
     <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net47\CommonServiceLocator.dll</HintPath>
     </Reference>
+    <Reference Include="FsRichTextBox">
+      <HintPath>..\ThirdParty\FsRichTextBox\FsRichTextBox.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.31\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -59,8 +65,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Interfaces\IDispatcherService.cs" />
+    <Compile Include="Tools\DependencyObjectExtensions.cs" />
     <Compile Include="Tools\RelayCommand.cs" />
     <Compile Include="Tools\ViewModelBase.cs" />
+    <Compile Include="UI\Behaviors\BindableSelectedItemBehavior.cs" />
     <Compile Include="UI\MainWindowVm.cs" />
     <Compile Include="UI\TaskListControl.xaml.cs">
       <DependentUpon>TaskListControl.xaml</DependentUpon>

@@ -9,7 +9,8 @@ using Task = TaskChecker.Models.Task;
 
 namespace TaskChecker.ViewModels
 {
-    internal class TaskVm : ViewModelBase
+    [Serializable]
+    public class TaskVm : ViewModelBase
     {
         #region Events
 
@@ -104,6 +105,16 @@ namespace TaskChecker.ViewModels
             }
         }
 
+        public string Description
+        {
+            get => Model.Description;
+            set
+            {
+                Model.Description = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating if this instance is expanded.
         /// </summary>
@@ -118,6 +129,21 @@ namespace TaskChecker.ViewModels
         }
 
         private bool _isExpanded;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is selected.
+        /// </summary>
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isSelected;
 
         /// <summary>
         /// Gets or sets a value indicating if this instance should get the edit focus.
@@ -277,6 +303,10 @@ namespace TaskChecker.ViewModels
             AddSubTask(newTask);
         }
 
+        #endregion Public methods
+
+        #region Private methods
+
         /// <summary>
         /// Removes all sub tasks (and disconnect events).
         /// </summary>
@@ -302,10 +332,6 @@ namespace TaskChecker.ViewModels
 
             RefreshStatus();
         }
-
-        #endregion Public methods
-
-        #region Private methods
 
         private void SwitchStatus(Task.Status? status = null)
         {

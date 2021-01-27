@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace TaskChecker.Models
 {
-    internal class Task
+    [Serializable]
+    public class Task
     {
         public enum Status
         {
@@ -19,6 +20,11 @@ namespace TaskChecker.Models
         /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the task description.
+        /// </summary>
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the current status.
@@ -59,6 +65,12 @@ namespace TaskChecker.Models
         #endregion Properties
 
         #region Constructor
+
+        public Task()
+        {
+            Title = "";
+            CurrentStatus = Status.Todo;
+        }
 
         public Task(string title)
         {

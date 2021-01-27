@@ -23,6 +23,17 @@ namespace TaskChecker.UI
         public TaskListControl()
         {
             InitializeComponent();
+
+            Splitter.DragDelta += OnSplitterDragDelta;
+        }
+
+        private void OnSplitterDragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+            double newWidth = ContentGrid.ColumnDefinitions[0].ActualWidth + e.HorizontalChange;
+
+            if (newWidth <= ContentGrid.ColumnDefinitions[0].MinWidth) return;
+
+            ContentGrid.ColumnDefinitions[0].Width = new GridLength(newWidth);
         }
     }
 }

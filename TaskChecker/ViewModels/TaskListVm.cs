@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Xml.Serialization;
 using TaskChecker.Tools;
 using Task = TaskChecker.Models.Task;
 
 namespace TaskChecker.ViewModels
 {
+    [Serializable]
     internal class TaskListVm : ViewModelBase
     {
         #region Properties
@@ -101,6 +106,21 @@ namespace TaskChecker.ViewModels
 
         private string _title;
 
+        /// <summary>
+        /// Gets or sets the selected task.
+        /// </summary>
+        public TaskVm SelectedTask
+        {
+            get => _selectedTask;
+            set
+            {
+                _selectedTask = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TaskVm _selectedTask;
+
         #endregion Properties
 
         #region Constructor
@@ -116,7 +136,7 @@ namespace TaskChecker.ViewModels
 
         #endregion Constructor
 
-        #region Private methods
+        #region Public methods
 
         /// <summary>
         /// Adds a new task in the task list.
@@ -152,7 +172,7 @@ namespace TaskChecker.ViewModels
             RefreshCompletionBar();
         }
 
-        #endregion Private methods
+        #endregion Public methods
 
         #region Callbacks
 
@@ -176,9 +196,16 @@ namespace TaskChecker.ViewModels
 
         private void OnTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(Task.Status)) return;
+            if (e.PropertyName == nameof(Task.Status))
+            {
+                RefreshCompletionBar();
+            }
+            else if (e.PropertyName == nameof(TaskVm.IsSelected))
+            {
+                TaskVm task = (TaskVm)sender;
 
-            RefreshCompletionBar();
+                if (task.IsSelected) SelectedTask = task;
+            }
         }
 
         #endregion Callbacks
