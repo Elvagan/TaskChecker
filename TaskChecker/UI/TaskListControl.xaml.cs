@@ -35,5 +35,10 @@ namespace TaskChecker.UI
 
             ContentGrid.ColumnDefinitions[0].Width = new GridLength(newWidth);
         }
+
+        private void OnRichTextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+            RichTextBox textBox = ((RichTextBox)sender);
+        }
     }
 }

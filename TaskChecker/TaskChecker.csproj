@@ -46,6 +46,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -65,10 +67,20 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Interfaces\IDispatcherService.cs" />
+    <Compile Include="Interfaces\ISelectableItemInList.cs" />
     <Compile Include="Tools\DependencyObjectExtensions.cs" />
+    <Compile Include="Tools\IDManager.cs" />
+    <Compile Include="Tools\PackageManger\FilePackage.cs" />
+    <Compile Include="Tools\PackageManger\FilePackageReader.cs" />
+    <Compile Include="Tools\PackageManger\FilePackageWriter.cs" />
+    <Compile Include="Models\TaskListDescriptor.cs" />
     <Compile Include="Tools\RelayCommand.cs" />
     <Compile Include="Tools\ViewModelBase.cs" />
+    <Compile Include="Tools\Workspace.cs" />
     <Compile Include="UI\Behaviors\BindableSelectedItemBehavior.cs" />
+    <Compile Include="UI\Behaviors\TreeViewItemFocusBehavior.cs" />
+    <Compile Include="UI\Converters\NullToVisbilityConverter.cs" />
+    <Compile Include="UI\Helpers\RichTextBoxHelper.cs" />
     <Compile Include="UI\MainWindowVm.cs" />
     <Compile Include="UI\TaskListControl.xaml.cs">
       <DependentUpon>TaskListControl.xaml</DependentUpon>
@@ -76,6 +88,10 @@
     <Compile Include="UI\TemplateSelectors\TaskTemplateSelector.cs" />
     <Compile Include="ViewModels\TaskListVm.cs" />
     <Compile Include="ViewModels\TaskVm.cs" />
+    <EmbeddedResource Include="res\desc_template.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

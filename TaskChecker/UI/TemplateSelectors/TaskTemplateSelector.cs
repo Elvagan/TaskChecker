@@ -6,6 +6,8 @@ namespace TaskChecker.UI.TemplateSelectors
 {
     internal class TaskTemplateSelector : DataTemplateSelector
     {
+        #region Properties
+
         /// <summary>
         /// Gets or sets the default template.
         /// </summary>
@@ -15,6 +17,10 @@ namespace TaskChecker.UI.TemplateSelectors
         /// Gets or sets the template for enum values.
         /// </summary>
         public DataTemplate CreationTemplate { get; set; }
+
+        #endregion Properties
+
+        #region Public methods
 
         /// <summary>
         /// When overridden in a derived class, returns a <see cref="T:System.Windows.DataTemplate" /> based on custom logic.
@@ -30,5 +36,7 @@ namespace TaskChecker.UI.TemplateSelectors
 
             return taskVm.IsFake ? CreationTemplate : DefaultTemplate;
         }
+
+        #endregion Public methods
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TaskChecker.Tools;
 
 namespace TaskChecker.Models
 {
@@ -15,6 +16,11 @@ namespace TaskChecker.Models
         };
 
         #region Properties
+
+        /// <summary>
+        /// Gets or sets the Identifier.
+        /// </summary>
+        public string ID { get; set; }
 
         /// <summary>
         /// Gets or sets the title.
@@ -47,6 +53,7 @@ namespace TaskChecker.Models
 
                 if (CurrentStatus == Status.Todo) return 0;
 
+                // Compute completion with subtasks
                 double completion = 0.0;
                 if (SubTasks.Count > 0)
                 {
@@ -69,12 +76,14 @@ namespace TaskChecker.Models
         public Task()
         {
             Title = "";
+            ID = IDManager.GetNewName("tsk");
             CurrentStatus = Status.Todo;
         }
 
         public Task(string title)
         {
             Title = title;
+            ID = IDManager.GetNewName("tsk");
             CurrentStatus = Status.Todo;
         }
 

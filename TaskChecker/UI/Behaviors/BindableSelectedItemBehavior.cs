@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -11,14 +7,17 @@ using Microsoft.Xaml.Behaviors;
 using TaskChecker.Tools;
 
 namespace TaskChecker.UI.Behaviors
-{/// <summary>
- ///     Behavior that makes the <see cref="System.Windows.Controls.TreeView.SelectedItem" /> bindable.
- /// https://stackoverflow.com/questions/11065995/binding-selecteditem-in-a-hierarchicaldatatemplate-applied-wpf-treeview
- /// </summary>
+{
+    /// <summary>
+    /// Behavior that makes the <see cref="System.Windows.Controls.TreeView.SelectedItem" /> bindable.
+    /// https://stackoverflow.com/questions/11065995/binding-selecteditem-in-a-hierarchicaldatatemplate-applied-wpf-treeview
+    /// </summary>
     public class BindableSelectedItemBehavior : Behavior<TreeView>
     {
+        #region Properties
+
         /// <summary>
-        ///     Identifies the <see cref="SelectedItem" /> dependency property.
+        /// Identifies the <see cref="SelectedItem" /> dependency property.
         /// </summary>
         public static readonly DependencyProperty SelectedItemProperty =
             DependencyProperty.Register(
@@ -28,21 +27,23 @@ namespace TaskChecker.UI.Behaviors
                 new UIPropertyMetadata(null, OnSelectedItemChanged));
 
         /// <summary>
-        ///     Gets or sets the selected item of the <see cref="TreeView" /> that this behavior is attached
-        ///     to.
+        /// Gets or sets the selected item of the <see cref="TreeView" /> that this behavior is attached to.
         /// </summary>
         public object SelectedItem
         {
             get => GetValue(SelectedItemProperty);
-
             set => SetValue(SelectedItemProperty, value);
         }
 
+        #endregion Properties
+
+        #region OnAttached / OnDetaching
+
         /// <summary>
-        ///     Called after the behavior is attached to an AssociatedObject.
+        /// Called after the behavior is attached to an AssociatedObject.
         /// </summary>
         /// <remarks>
-        ///     Override this to hook up functionality to the AssociatedObject.
+        /// Override this to hook up functionality to the AssociatedObject.
         /// </remarks>
         protected override void OnAttached()
         {
@@ -51,11 +52,10 @@ namespace TaskChecker.UI.Behaviors
         }
 
         /// <summary>
-        ///     Called when the behavior is being detached from its AssociatedObject, but before it has
-        ///     actually occurred.
+        /// Called when the behavior is being detached from its AssociatedObject, but before it has actually occurred.
         /// </summary>
         /// <remarks>
-        ///     Override this to unhook functionality from the AssociatedObject.
+        /// Override this to unhook functionality from the AssociatedObject.
         /// </remarks>
         protected override void OnDetaching()
         {
@@ -65,6 +65,10 @@ namespace TaskChecker.UI.Behaviors
                 AssociatedObject.SelectedItemChanged -= this.OnTreeViewSelectedItemChanged;
             }
         }
+
+        #endregion OnAttached / OnDetaching
+
+        #region Private methods
 
         private static Action<int> GetBringIndexIntoView(Panel itemsHostPanel)
         {
@@ -90,15 +94,9 @@ namespace TaskChecker.UI.Behaviors
         /// <summary>
         /// Recursively search for an item in this subtree.
         /// </summary>
-        /// <param name="container">
-        /// The parent ItemsControl. This can be a TreeView or a TreeViewItem.
-        /// </param>
-        /// <param name="item">
-        /// The item to search for.
-        /// </param>
-        /// <returns>
-        /// The TreeViewItem that contains the specified item.
-        /// </returns>
+        /// <param name="container">The parent ItemsControl. This can be a TreeView or a TreeViewItem.</param>
+        /// <param name="item">The item to search for.</param>
+        /// <returns>The TreeViewItem that contains the specified item.</returns>
         private static TreeViewItem GetTreeViewItem(ItemsControl container, object item)
         {
             if (container != null)
@@ -218,5 +216,7 @@ namespace TaskChecker.UI.Behaviors
         {
             this.SelectedItem = e.NewValue;
         }
+
+        #endregion Private methods
     }
 }

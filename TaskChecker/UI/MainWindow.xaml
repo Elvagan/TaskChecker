@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TaskChecker.UI"
-        xmlns:fsRichTextBox="clr-namespace:FsWpfControls.FsRichTextBox;assembly=FsRichTextBox"
+        xmlns:converters="clr-namespace:TaskChecker.UI.Converters"
         FontSize="18"
         mc:Ignorable="d"
         Title="TaskChecker" Height="Auto" Width="Auto" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
@@ -12,6 +12,11 @@
     <Window.DataContext>
         <local:MainWindowVm />
     </Window.DataContext>
+
+    <Window.Resources>
+        <converters:NullToVisibilityConverter x:Key="HideIfNull" VisibilityIfNull="Collapsed" VisibilityIfNotNull="Visible" />
+        <converters:NullToVisibilityConverter x:Key="ShowIfNull" VisibilityIfNull="Visible" VisibilityIfNotNull="Collapsed" />
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -22,12 +27,14 @@
         <Menu Grid.Row="0" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Command="{Binding NewTaskListCommand}" />
-                <MenuItem Header="_Open" Command="{Binding OpenTaskListCommand}" />
-                <MenuItem Header="_Save" Command="{Binding SaveTaskListCommand}" />
+                <MenuItem Header="_Import" Command="{Binding ImportTaskListCommand}" />
+                <MenuItem Header="_Export" Command="{Binding ExportTaskListCommand}" />
                 <Separator />
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
         </Menu>
-        <local:TaskListControl Grid.Row="1" MinWidth="300" />
+        <local:TaskListControl Grid.Row="1" MinWidth="300" Visibility="{Binding CurrentTaskListVm, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource HideIfNull}}" />
+        <TextBlock Grid.Row="1" MinWidth="300" Visibility="{Binding CurrentTaskListVm, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ShowIfNull}}"
+                   Text="No task list found, please create or open a list." />
     </Grid>
 </Window>

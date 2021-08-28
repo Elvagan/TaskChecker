@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
@@ -6,18 +7,34 @@ using System.Xml.Serialization;
 using Microsoft.Win32;
 using TaskChecker.Models;
 using TaskChecker.Tools;
+using TaskChecker.Tools.PackageManger;
 using TaskChecker.ViewModels;
 
 namespace TaskChecker.UI
 {
-    internal class MainWindowVm : ViewModelBase
+    public class MainWindowVm : ViewModelBase
     {
         #region Properties
 
         /// <summary>
         /// Gets or sets the current task list View Model.
         /// </summary>
-        public TaskListVm CurrentTaskListVm { get; set; }
+        public TaskListVm CurrentTaskListVm
+        {
+            get => _currentTaskListVm;
+            set
+            {
+                _currentTaskListVm = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TaskListVm _currentTaskListVm = null;
+
+        /// <summary>
+        /// Gets the workspace.
+        /// </summary>
+        public Workspace Workspace { get; private set; }
 
         #endregion Properties
 
@@ -25,7 +42,17 @@ namespace TaskChecker.UI
 
         public MainWindowVm()
         {
-            CurrentTaskListVm = new TaskListVm("New Task List");
+            string defaultPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CheckTree");
+            Workspace = new Workspace(defaultPath);
+
+            if (Workspace.TaskLists.Count > 0)
+            {
+                CurrentTaskListVm = Workspace.TaskLists.ElementAt(0);
+            }
+            else
+            {
+                CurrentTaskListVm = null;
+            }
         }
 
         #endregion Constructor
@@ -40,65 +67,93 @@ namespace TaskChecker.UI
 
         private void NewTaskListExecute(object sender)
         {
+            Workspace.CloseList(CurrentTaskListVm);
+            string newID = IDManager.GetNewName("lst");
+            CurrentTaskListVm = new TaskListVm(Workspace, newID, "New task list");
+
+            Workspace.RefreshWorkspace();
         }
 
         #endregion New task list
 
-        #region Open task list
+        #region Import task list
 
-        public ICommand OpenTaskListCommand => _openTaskListCommand ?? (_openTaskListCommand = new RelayCommand(OpenTaskListExecute));
+        public ICommand ImportTaskListCommand => _importTaskListCommand ?? (_importTaskListCommand = new RelayCommand(ImportTaskListExecute));
 
-        private RelayCommand _openTaskListCommand;
+        private RelayCommand _importTaskListCommand;
 
-        private void OpenTaskListExecute(object sender)
+        private void ImportTaskListExecute(object sender)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            //openFileDialog.InitialDirectory = "c:\\";
-            openFileDialog.Filter = "Task list files (*.xml)|*.xml";
-            openFileDialog.FilterIndex = 1;
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = Workspace.WorkspacePath,
+                Filter = "Task list files (*.lst)|*.lst",
+                FilterIndex = 1
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                //Get the path of specified file
+                // Get the path of specified file
                 string filePath = openFileDialog.FileName;
-                string fileName = Path.GetFileNameWithoutExtension(filePath);
 
-                XmlSerializer xs = new XmlSerializer(typeof(List<Models.Task>));
-                using (StreamReader rd = new StreamReader(filePath))
+                Workspace.CloseList(CurrentTaskListVm);
+
+                // Open the list package
+                FilePackageReader reader = new FilePackageReader(filePath);
+                reader.OpenPackage(Workspace.WorkspacePath);
+
+                Workspace.RefreshWorkspace();
+
+                if (Workspace.TaskLists.Count > 0)
                 {
-                    if (!(xs.Deserialize(rd) is List<Task> import)) return;
-
-                    CurrentTaskListVm = new TaskListVm(fileName);
-                    foreach (var task in import)
-                    {
-                        CurrentTaskListVm.AddTask(task);
-                    }
-
-                    OnPropertyChanged(nameof(CurrentTaskListVm));
+                    CurrentTaskListVm = Workspace.TaskLists.ElementAt(0);
+                }
+                else
+                {
+                    CurrentTaskListVm = null;
                 }
             }
         }
 
-        #endregion Open task list
+        #endregion Import task list
 
-        #region Save task list
+        #region Export task list
 
-        public ICommand SaveTaskListCommand => _saveTaskListCommand ?? (_saveTaskListCommand = new RelayCommand(SaveTaskListExecute));
+        public ICommand ExportTaskListCommand => _exportTaskListCommand ?? (_exportTaskListCommand = new RelayCommand(ExportTaskListExecute));
 
-        private RelayCommand _saveTaskListCommand;
+        private RelayCommand _exportTaskListCommand;
 
-        private void SaveTaskListExecute(object sender)
+        private void ExportTaskListExecute(object sender)
         {
-            List<Models.Task> export = CurrentTaskListVm.Tasks.Where(t => !t.IsFake).Select(t => t.Model).ToList();
-
-            XmlSerializer xs = new XmlSerializer(typeof(List<Models.Task>));
-            using (StreamWriter wr = new StreamWriter($"{CurrentTaskListVm.Title}.xml"))
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                xs.Serialize(wr, export);
+                InitialDirectory = Workspace.WorkspacePath,
+                FileName = $"{CurrentTaskListVm.Title}",
+                DefaultExt = ".lst",
+                Filter = "Task list files (*.lst)|*.lst",
+                FilterIndex = 1
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                Workspace.ExportList(CurrentTaskListVm, saveFileDialog.FileName);
             }
         }
 
-        #endregion Save task list
+        #endregion Export task list
+
+        #region Exit
+
+        public ICommand ExitCommand => _exitCommand ?? (_exitCommand = new RelayCommand(ExitExecute));
+
+        private RelayCommand _exitCommand;
+
+        private void ExitExecute(object sender)
+        {
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        #endregion Exit
 
         #endregion Commands
     }

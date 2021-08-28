@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
+using System.Reflection;
 using TaskChecker.Tools;
 using Task = TaskChecker.Models.Task;
+using System.Text;
 
 namespace TaskChecker.ViewModels
 {
@@ -24,6 +29,11 @@ namespace TaskChecker.ViewModels
         /// </summary>
         public event Action AskSibling;
 
+        /// <summary
+        /// Occurs when a substak of the task is modified.
+        /// </summary>
+        public event Action<TaskVm> SubTaskTitleChanged;
+
         #endregion Events
 
         #region Properties
@@ -37,6 +47,16 @@ namespace TaskChecker.ViewModels
         /// Gets or sets the completion.
         /// </summary>
         public string Completion => Model.Completion + " %";
+
+        /// <summary>
+        /// Gets the task identifier.
+        /// </summary>
+        public string ID => Model.ID;
+
+        /// <summary>
+        /// Gets the list identifier.
+        /// </summary>
+        public string ListID { get; }
 
         /// <summary>
         /// Gets or sets the status name.
@@ -73,6 +93,11 @@ namespace TaskChecker.ViewModels
         public Task Model { get; set; }
 
         /// <summary>
+        /// Gets the workspace.
+        /// </summary>
+        public Workspace Workspace { get; }
+
+        /// <summary>
         /// Gets or sets the sub tasks.
         /// </summary>
         public ObservableCollection<TaskVm> SubTasks { get; set; }
@@ -101,16 +126,6 @@ namespace TaskChecker.ViewModels
             set
             {
                 Model.Title = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Description
-        {
-            get => Model.Description;
-            set
-            {
-                Model.Description = value;
                 OnPropertyChanged();
             }
         }
@@ -160,6 +175,22 @@ namespace TaskChecker.ViewModels
 
         private bool _shouldGetFocus;
 
+        /// <summary>
+        /// Gets or sets the description flowdocument as text.
+        /// </summary>
+        public string DescriptionDoc
+        {
+            get => _descriptionDoc;
+            set
+            {
+                _descriptionDoc = value;
+                Workspace.SaveDescriptionFile(_descriptionDoc, ListID, ID);
+                OnPropertyChanged();
+            }
+        }
+
+        private string _descriptionDoc;
+
         #endregion Properties
 
         #region Constructors
@@ -169,25 +200,31 @@ namespace TaskChecker.ViewModels
             Model = new Task("") { CurrentStatus = Task.Status.None };
             Parent = null;
             IsFake = true;
+            ListID = "";
             SubTasks = new ObservableCollection<TaskVm>();
         }
 
-        public TaskVm(Task model, TaskVm parent = null)
+        public TaskVm(Workspace workspace, Task model, string listID, TaskVm parent = null)
         {
             Model = model;
             Parent = parent;
+            ListID = listID;
             IsFake = false;
             SubTasks = new ObservableCollection<TaskVm> { new TaskVm() };
             SubTasks.ElementAt(0).AskSibling += OnSubTaskAskSibling;
+            Workspace = workspace;
+
+            DescriptionDoc = workspace.LoadDescriptionFile(listID, Model.ID);
 
             foreach (var modelSubTask in Model.SubTasks)
             {
-                TaskVm subTask = new TaskVm(modelSubTask, this);
+                TaskVm subTask = new TaskVm(Workspace, modelSubTask, ListID, this);
                 subTask.PropertyChanged += OnSubTaskPropertyChanged;
                 subTask.AskDelete += OnSubTaskAskDelete;
                 SubTasks.Add(subTask);
             }
 
+            IsExpanded = true;
             ShouldGetFocus = true;
         }
 
@@ -197,6 +234,11 @@ namespace TaskChecker.ViewModels
 
         private void OnSubTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Title))
+            {
+                SubTaskTitleChanged?.Invoke((TaskVm)sender);
+            }
+
             if (e.PropertyName != nameof(Status)) return;
 
             RefreshStatus();
@@ -206,6 +248,8 @@ namespace TaskChecker.ViewModels
         {
             SubTasks.Remove(sender);
             Model.SubTasks.Remove(sender.Model);
+
+            Workspace.DeleteDescriptionFile(sender.ListID, sender.ID);
 
             RefreshStatus();
         }
@@ -284,7 +328,7 @@ namespace TaskChecker.ViewModels
         public void AddSubTask(Task task)
         {
             Model.SubTasks.Insert(0, task);
-            TaskVm newTaskVm = new TaskVm(task, this);
+            TaskVm newTaskVm = new TaskVm(Workspace, task, ListID, this);
             SubTasks.Insert(1, newTaskVm);
             newTaskVm.PropertyChanged += OnSubTaskPropertyChanged;
             newTaskVm.AskDelete += OnSubTaskAskDelete;

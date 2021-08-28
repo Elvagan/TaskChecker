@@ -12,8 +12,7 @@ using Task = TaskChecker.Models.Task;
 
 namespace TaskChecker.ViewModels
 {
-    [Serializable]
-    internal class TaskListVm : ViewModelBase
+    public class TaskListVm : ViewModelBase
     {
         #region Properties
 
@@ -26,6 +25,11 @@ namespace TaskChecker.ViewModels
         /// Gets or sets the tasks.
         /// </summary>
         public ObservableCollection<TaskVm> Tasks { get; set; } = new ObservableCollection<TaskVm>();
+
+        /// <summary>
+        /// Gets the workspace.
+        /// </summary>
+        public Workspace Workspace { get; }
 
         /// <summary>
         /// Gets the todo tasks ratio.
@@ -101,10 +105,13 @@ namespace TaskChecker.ViewModels
             {
                 _title = value;
                 OnPropertyChanged();
+                UpdateTaskList();
             }
         }
 
         private string _title;
+
+        public string ID { get; }
 
         /// <summary>
         /// Gets or sets the selected task.
@@ -125,13 +132,16 @@ namespace TaskChecker.ViewModels
 
         #region Constructor
 
-        public TaskListVm(string title)
+        public TaskListVm(Workspace workspace, string id, string title)
         {
             _title = title;
-            TaskVm addTask = new TaskVm(new Task("") { CurrentStatus = Task.Status.None });
+            Workspace = workspace;
+            ID = id;
+            TaskVm addTask = new TaskVm();
             addTask.AskSibling += OnAddTaskAskSibling;
             Tasks.Add(addTask);
-            Tasks.ElementAt(0).IsFake = true;
+
+            UpdateTaskList();
         }
 
         #endregion Constructor
@@ -163,13 +173,14 @@ namespace TaskChecker.ViewModels
             }
             else
             {
-                TaskVm newVm = new TaskVm(task);
+                TaskVm newVm = new TaskVm(Workspace, task, ID);
                 newVm.AskDelete += OnTaskVmAskDelete;
                 newVm.PropertyChanged += OnTaskPropertyChanged;
+                newVm.SubTaskTitleChanged += OnTaskTitleChanged;
                 Tasks.Add(newVm);
             }
 
-            RefreshCompletionBar();
+            UpdateTaskList();
         }
 
         #endregion Public methods
@@ -181,24 +192,26 @@ namespace TaskChecker.ViewModels
             taskVm.AskDelete -= OnTaskVmAskDelete;
             Tasks.Remove(taskVm);
 
-            RefreshCompletionBar();
+            Workspace.DeleteDescriptionFile(taskVm.ListID, taskVm.ID);
+
+            UpdateTaskList();
         }
 
         private void OnAddTaskAskSibling()
         {
-            TaskVm newTask = new TaskVm(new Task(""));
+            TaskVm newTask = new TaskVm(Workspace, new Task(""), ID);
             newTask.AskDelete += OnTaskVmAskDelete;
             newTask.PropertyChanged += OnTaskPropertyChanged;
             Tasks.Insert(1, newTask);
 
-            RefreshCompletionBar();
+            UpdateTaskList();
         }
 
         private void OnTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Task.Status))
+            if (e.PropertyName == nameof(Task.Status) || e.PropertyName == nameof(Task.Title))
             {
-                RefreshCompletionBar();
+                UpdateTaskList();
             }
             else if (e.PropertyName == nameof(TaskVm.IsSelected))
             {
@@ -206,6 +219,11 @@ namespace TaskChecker.ViewModels
 
                 if (task.IsSelected) SelectedTask = task;
             }
+        }
+
+        private void OnTaskTitleChanged(TaskVm taskVm)
+        {
+            UpdateTaskList();
         }
 
         #endregion Callbacks
@@ -225,7 +243,13 @@ namespace TaskChecker.ViewModels
 
         #region Private methods
 
-        public void RefreshCompletionBar()
+        private void UpdateTaskList()
+        {
+            Workspace.SaveListHierarchy(this);
+            RefreshCompletionBar();
+        }
+
+        private void RefreshCompletionBar()
         {
             OnPropertyChanged(nameof(HasRatio));
             OnPropertyChanged(nameof(TodoRatio));
